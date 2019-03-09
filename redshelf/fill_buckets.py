@@ -10,19 +10,24 @@ def create_buckets():
     keys = ['publisher', 'duration', 'price']
     num_buckets = 0
     root = Node('root', 'root')
-    with open('/Users/liamadams/Documents/interview/redshelf/purchase_buckets.csv', newline='') as pb_file:
+    with open('purchase_buckets.csv', newline='') as pb_file:
         bucket_reader = csv.reader(pb_file, delimiter=',')
         for row in bucket_reader:            
             vals = [row[0], row[2], row[1]]
             root.insert(keys, vals, num_buckets)
             num_buckets = num_buckets + 1
-        root.insert(keys, ['*', '*', '*'], num_buckets)
+
+    # if uncategorized bucket wasn't in file create it now
+    if not root.get_bucket(keys, ['*', '*', '*']):
+            root.insert(keys, ['*', '*', '*'], num_buckets)        
+            num_buckets = num_buckets + 1
     return root, num_buckets
+
 
 # Add each purchase to tree
 def fill_buckets(root):
     keys = ['publisher', 'duration', 'price']
-    with open('/Users/liamadams/Documents/interview/redshelf/purchase_data.csv', newline='') as data_file:
+    with open('purchase_data.csv', newline='') as data_file:
         data_reader = csv.reader(data_file, delimiter=',')
         for row in data_reader:
             purchase = Purchase(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
@@ -33,6 +38,7 @@ def fill_buckets(root):
             
             node = return_tuple[0]
             matches = return_tuple[1]
+            # if wild card used and only one match try leading wild card to see if it returns 2 matches
             if node.value == '*' and matches == 1:
                 second_tuple = root.add_purchase_root(purchase, keys, ['*', purchase.duration, purchase.price], 0)
                 if second_tuple and second_tuple[1] > matches:
@@ -51,12 +57,16 @@ def create_json(bucket_list_json):
 
 
 def run():
+    # create tree
     return_tuple = create_buckets()
     root = return_tuple[0]
     num_buckets = return_tuple[1]
+    # fill tree with purchases
     fill_buckets(root)
     bucket_list_json = [None] * num_buckets
+    # get purchases in json serializable objects
     root.get_leaf_nodes(bucket_list_json, [])
+    # generate json file
     create_json(bucket_list_json)
 
 run()
