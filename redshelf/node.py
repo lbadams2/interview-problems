@@ -94,8 +94,9 @@ class Node:
                             # break to back track and try wild card
                             break
                         return ret_val
-            # if this line is reached val matched key but no child matched
-            # try wild card to see if it has a matching child
+            # if this line is reached current node matched but no child matched
+            # try wild card for current node to see if it has a matching child
+            matches = matches - 1
             wild_tmp = Node(keys[0], '*')
             if wild_tmp in self.children:
                 for child in self.children:
