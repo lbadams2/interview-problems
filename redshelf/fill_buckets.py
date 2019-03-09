@@ -27,26 +27,20 @@ def fill_buckets(root):
         for row in data_reader:
             purchase = Purchase(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
             vals = [purchase.publisher, purchase.duration, purchase.price]
-            # add purchase root will not actually add the purchase, just return to node it would be added to
+            # add purchase root will not actually add the purchase, just return node it would be added to
             # and the number of matches so we can compare to other paths with wild cards.
             return_tuple = root.add_purchase_root(purchase, keys, vals, 0)
             
-            if return_tuple:
-                node = return_tuple[0]
-                matches = return_tuple[1]
-                if node.value == '*' and matches == 1:
-                    second_tuple = root.add_purchase_root(purchase, keys, ['*', purchase.duration, purchase.price], 0)
-                    if second_tuple:
-                        second_node = second_tuple[0]
-                        second_matches = second_tuple[1]
-                        if second_matches == 2:
-                            second_node.add_purchase_node(purchase)
-                    else:
-                        node.add_purchase_node(purchase)
+            node = return_tuple[0]
+            matches = return_tuple[1]
+            if node.value == '*' and matches == 1:
+                second_tuple = root.add_purchase_root(purchase, keys, ['*', purchase.duration, purchase.price], 0)
+                if second_tuple and second_tuple[1] > matches:
+                    second_node = second_tuple[0]
+                    second_node.add_purchase_node(purchase)
                 else:
                     node.add_purchase_node(purchase)
             else:
-                node = root.add_purchase_root(purchase, keys, ['*', '*', '*'], 0)[0]
                 node.add_purchase_node(purchase)
 
 
